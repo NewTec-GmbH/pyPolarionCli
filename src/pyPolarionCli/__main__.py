@@ -95,7 +95,7 @@ def add_parser() -> argparse.ArgumentParser:
     parser.add_argument('-s',
                         '--server',
                         type=str,
-                        metavar='<server URL>',
+                        metavar='<server_url>',
                         help="The Polarion server URL to connect to.")
 
     parser.add_argument("--version",
