@@ -46,8 +46,8 @@ class Ret(IntEnum):
     """This type shall be used for return status information.
     """
     OK = 0
+    ERROR_LOGIN = 1
     ERROR_ARGPARSE = 2  # Must be 2 to match the argparse error code.
-    ERROR_LOGIN = 3
 
 ################################################################################
 # Functions
