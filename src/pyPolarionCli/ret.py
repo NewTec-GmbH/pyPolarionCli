@@ -48,6 +48,7 @@ class Ret(IntEnum):
     OK = 0
     ERROR_LOGIN = 1
     ERROR_ARGPARSE = 2  # Must be 2 to match the argparse error code.
+    ERROR_INVALID_ARGUMENTS = 3
 
 ################################################################################
 # Functions
