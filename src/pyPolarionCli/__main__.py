@@ -141,7 +141,7 @@ def main() -> int:
         # A broad exception has to be caught since the specific Exception Type can't be accessed.
         try:
             # to do: remove the "pylint: disable" once the client is used.
-            # pylint: disable=W0612
+            # pylint: disable=unused-variable
             client = Polarion(polarion_url=args.server,
                               user=args.user,
                               password=args.password,
