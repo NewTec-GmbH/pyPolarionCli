@@ -127,7 +127,7 @@ def main() -> Ret:
 
     # Create the main parser and add the subparsers.
     parser = add_parser()
-    subparser = parser.add_subparsers(required='True', dest="cmd")
+    subparser = parser.add_subparsers(required=True, dest="cmd")
 
     # Register all commands.
     for cmd_register in _COMMAND_REG_LIST:

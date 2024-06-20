@@ -38,6 +38,7 @@ import argparse
 import logging
 from datetime import date, datetime
 from polarion.polarion import Polarion
+from polarion.project import Project
 from polarion.workitem import Workitem
 from .ret import Ret
 
@@ -57,7 +58,7 @@ _OUTPUT_FILE_NAME = "search_results.json"
 ################################################################################
 
 
-def _handle_object_with_dict(obj_with_dict) -> dict:
+def _handle_object_with_dict(obj_with_dict: object) -> dict:
     """
     Handle an object with a __dict__ attribute.
 
@@ -67,7 +68,7 @@ def _handle_object_with_dict(obj_with_dict) -> dict:
     Returns:
         dict: The dictionary representation of the object.
     """
-    parsed_dict = {}
+    parsed_dict: dict = {}
     for _, subvalue in obj_with_dict.__dict__.items():
         for subkey in subvalue:
             _parse_attributes_recursively(
@@ -77,7 +78,7 @@ def _handle_object_with_dict(obj_with_dict) -> dict:
     return parsed_dict
 
 
-def _parse_attributes_recursively(output_dict: dict, value, key):
+def _parse_attributes_recursively(output_dict: dict, value: object, key: str) -> None:
     """
     Parse the attributes of Python objects recursively and store them in a dictionary.
 
@@ -97,7 +98,7 @@ def _parse_attributes_recursively(output_dict: dict, value, key):
 
     # Check if the value is a list
     elif isinstance(value, list):
-        sublist = []
+        sublist: list = []
         for element in value:
             # Check if the element is an object with a __dict__ attribute
             if hasattr(element, "__dict__"):
@@ -135,7 +136,7 @@ def register(subparser) -> dict:
     Returns:
         obj:    the command parser of this module
     """
-    cmd_dict = {
+    cmd_dict: dict = {
         "name": _CMD_NAME,
         "handler": _execute
     }
@@ -170,7 +171,7 @@ def register(subparser) -> dict:
 
 def _execute(args, polarion_client: Polarion) -> Ret:
     """ This function servers as entry point for the command 'search'.
-        It will be stored as callback for this modules subparser command.
+        It will be stored as callback for this module's subparser command.
 
     Args: 
         args (obj): The command line arguments.
@@ -179,15 +180,13 @@ def _execute(args, polarion_client: Polarion) -> Ret:
     Returns:
         bool: The status of the command execution.
     """
-    ret_status = Ret.ERROR_INVALID_ARGUMENTS
+    ret_status: Ret = Ret.ERROR_INVALID_ARGUMENTS
 
     if ("" != args.project) and ("" != args.query) and (None is not polarion_client):
-        project_id: str = args.project
-        query: str = args.query
-        output_folder = "."
+        output_folder: str = "."
         output_dict: dict = {
-            "project": project_id,
-            "query": query,
+            "project": args.project,
+            "query": args.query,
             "number_of_results": 0,
             "results": [],
         }
@@ -195,34 +194,44 @@ def _execute(args, polarion_client: Polarion) -> Ret:
         if args.output is not None:
             output_folder = args.output
 
-        file_path = f"{output_folder}/{project_id}_{_OUTPUT_FILE_NAME}"
+        file_path: str = f"{output_folder}/{output_dict['project']}_{_OUTPUT_FILE_NAME}"
 
-        search_result: list[Workitem] = polarion_client.getProject(
-            project_id).searchWorkitemFullItem(query)
+        try:
+            # Get the project object from the Polarion client.
+            project: Project = polarion_client.getProject(
+                output_dict['project'])
+        # Exception of type Exception is raised when the project does not exist.
+        except Exception as ex:  # pylint: disable=broad-except
+            logging.error("%s", ex)
+            ret_status = Ret.ERROR_SEARCH_FAILED
+        else:
+            # Search for work items in the project.
+            search_result: list[Workitem] = project.searchWorkitemFullItem(
+                output_dict['query'])
 
-        output_dict["number_of_results"] = len(search_result)
+            output_dict["number_of_results"] = len(search_result)
 
-        # Iterate over the search results and store them in the output dictionary.
-        for workitem in search_result:
-            workitem_dict = {}
+            # Iterate over the search results and store them in the output dictionary.
+            for workitem in search_result:
+                workitem_dict: dict = {}
 
-            # Parse the attributes of the work item recursively.
-            # Internal _polariom_item attribute is used to access the work item attributes.
-            # pylint: disable=protected-access
-            for _, value in workitem._polarion_item.__dict__.items():
-                for key in value:
-                    _parse_attributes_recursively(
-                        workitem_dict, value[key], key)
+                # Parse the attributes of the work item recursively.
+                # Internal _polarion_item attribute is used to access the work item attributes.
+                # pylint: disable=protected-access
+                for _, value in workitem._polarion_item.__dict__.items():
+                    for key in value:
+                        _parse_attributes_recursively(
+                            workitem_dict, value[key], key)
 
-            # Append the work item dictionary to the results list.
-            output_dict["results"].append(workitem_dict)
+                # Append the work item dictionary to the results list.
+                output_dict["results"].append(workitem_dict)
 
-        # Store the search results in a JSON file.
-        with open(file_path, 'w', encoding="UTF-8") as file:
-            file.write(json.dumps(output_dict, indent=2))
+            # Store the search results in a JSON file.
+            with open(file_path, 'w', encoding="UTF-8") as file:
+                file.write(json.dumps(output_dict, indent=2))
 
-        logging.info("Search results stored in %s", file_path)
-        ret_status = Ret.OK
+            logging.info("Search results stored in %s", file_path)
+            ret_status = Ret.OK
 
     return ret_status
 
