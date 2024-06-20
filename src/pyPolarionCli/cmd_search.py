@@ -36,6 +36,7 @@
 import json
 import argparse
 import logging
+from datetime import date, datetime
 from polarion.polarion import Polarion
 from polarion.workitem import Workitem
 from .ret import Ret
@@ -54,6 +55,75 @@ _OUTPUT_FILE_NAME = "search_results.json"
 ################################################################################
 # Functions
 ################################################################################
+
+
+def _handle_object_with_dict(obj_with_dict) -> dict:
+    """
+    Handle an object with a __dict__ attribute.
+
+    Args:
+        obj_with_dict (obj): The object to handle.
+
+    Returns:
+        dict: The dictionary representation of the object.
+    """
+    parsed_dict = {}
+    for _, subvalue in obj_with_dict.__dict__.items():
+        for subkey in subvalue:
+            _parse_attributes_recursively(
+                parsed_dict,
+                subvalue[subkey],
+                subkey)
+    return parsed_dict
+
+
+def _parse_attributes_recursively(output_dict: dict, value, key):
+    """
+    Parse the attributes of Python objects recursively and store them in a dictionary.
+
+    Args:
+        output_dict (dict): The dictionary to store the parsed attributes.
+        value (obj): The value to parse.
+        key (str): The key of the value in the dictionary.
+
+    Returns:
+        None
+    """
+    attribute_value = None
+
+    # Check if the value is a datetime or date object
+    if isinstance(value, (datetime, date)):
+        attribute_value = value.isoformat()
+
+    # Check if the value is a list
+    elif isinstance(value, list):
+        sublist = []
+        for element in value:
+            # Check if the element is an object with a __dict__ attribute
+            if hasattr(element, "__dict__"):
+                sublist.append(_handle_object_with_dict(element))
+
+            # Check if the element is a list
+            elif isinstance(element, list):
+                raise RuntimeWarning("List in List")
+
+            # element is a simple value
+            else:
+                sublist.append(element)
+
+        # Store the list in the attribute value
+        attribute_value = sublist
+
+    # Check if the value is an object with a __dict__ attribute
+    elif hasattr(value, "__dict__"):
+        attribute_value = _handle_object_with_dict(value)
+
+    # value is a simple value
+    else:
+        attribute_value = value
+
+    # Store the attribute value in the output dictionary
+    output_dict[key] = attribute_value
 
 
 def register(subparser) -> dict:
@@ -128,14 +198,26 @@ def _execute(args, polarion_client: Polarion) -> Ret:
         file_path = f"{output_folder}/{project_id}_{_OUTPUT_FILE_NAME}"
 
         search_result: list[Workitem] = polarion_client.getProject(
-            project_id).searchWorkitem(query)
+            project_id).searchWorkitemFullItem(query)
 
         output_dict["number_of_results"] = len(search_result)
 
-        for item in search_result:
-            item_dict = vars(item).get("__values__")
-            output_dict["results"].append(item_dict)
+        # Iterate over the search results and store them in the output dictionary.
+        for workitem in search_result:
+            workitem_dict = {}
 
+            # Parse the attributes of the work item recursively.
+            # Internal _polariom_item attribute is used to access the work item attributes.
+            # pylint: disable=protected-access
+            for _, value in workitem._polarion_item.__dict__.items():
+                for key in value:
+                    _parse_attributes_recursively(
+                        workitem_dict, value[key], key)
+
+            # Append the work item dictionary to the results list.
+            output_dict["results"].append(workitem_dict)
+
+        # Store the search results in a JSON file.
         with open(file_path, 'w', encoding="UTF-8") as file:
             file.write(json.dumps(output_dict, indent=2))
 
