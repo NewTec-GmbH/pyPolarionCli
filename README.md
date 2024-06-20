@@ -45,7 +45,7 @@ The query must be in the Polarion format.
 Example:
 
 ```cmd
-pyPolarionCli --user my_username --password my_password --server my_server search --project my_project --query "my_query"
+pyPolarionCli --user my_username --password my_password --server my_server search --project my_project --query "author.id:myname"
 
 ```
 

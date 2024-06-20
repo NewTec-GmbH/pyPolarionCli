@@ -148,7 +148,7 @@ def register(subparser) -> dict:
     required_subarguments = sub_parser_search.add_argument_group(
         'required arguments')
 
-    required_subarguments.add_argument('-p',
+    required_subarguments.add_argument('-j',
                                        '--project',
                                        type=str,
                                        metavar='<project_id>',
