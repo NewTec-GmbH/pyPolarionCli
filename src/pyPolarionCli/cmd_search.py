@@ -40,7 +40,7 @@ from datetime import date, datetime
 from polarion.polarion import Polarion
 from polarion.project import Project
 from polarion.workitem import Workitem
-from .ret import Ret
+from pyPolarionCli.ret import Ret
 
 ################################################################################
 # Variables
