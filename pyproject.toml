@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel", "toml"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyPolarionCli"
+version = "1.0.0"
+description = "pyPolarionCli is a command-line tool designed for easy access to Polarion work items, e.g. for metric creation."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Gabryel Reyes", email = "gabryel.reyes@newtec.de" },
+    { name = "Juliane Kerpe", email = "juliane.kerpe@newtec.de" }
+]
+license = {text = "BSD 3-Clause"}
+classifiers = [
+    "License :: OSI Approved :: BSD 3-Clause",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+
+dependencies = [
+    "polarion>=1.4.0",
+    "toml>=0.10.2"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest > 5.0.0",
+  "pytest-cov[all]"
+]
+
+[project.urls]
+documentation = "https://github.com/NewTec-GmbH/pyPolarionCli"
+repository = "https://github.com/NewTec-GmbH/pyPolarionCli"
+tracker = "https://github.com/NewTec-GmbH/pyPolarionCli/issues"
+
+[project.scripts]
+pyPolarionCli = "pyPolarionCli.__main__:main"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "src"
+]

@@ -1,0 +1,27 @@
+@startuml pyPolarionCli_Search_Sequence
+Title pyPolarionCli Search Sequence
+hide footbox
+autoactivate on
+
+actor User as user
+box "pyPolarionCli" #LightBlue
+    participant "Main\nentry point" as main
+    participant "Search\nCommand" as search
+end box
+database "Polarion" as polarion
+database "Filesystem" as fs
+
+user -> main: Call pyPolarionCli
+    main -> polarion: Login to Polarion
+    return Polarion client session
+    main -> search: Call search command
+        search -> polarion: Search for work items \n using query
+        return Work items
+        search -> search: Parse work items \n into JSON format.
+        return JSON
+        search -> fs: Save JSON to file
+        return
+    return Return value
+return Return value
+
+@enduml
