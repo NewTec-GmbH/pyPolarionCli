@@ -58,6 +58,8 @@ PROG_COPYRIGHT = f"Copyright (c) 2024 NewTec GmbH - {__license__}"
 PROG_GITHUB = f"Find the project on GitHub: {__repository__}"
 PROG_EPILOG = f"{PROG_COPYRIGHT} - {PROG_GITHUB}"
 
+LOG: logging.Logger = logging.getLogger(__name__)
+
 ################################################################################
 # Classes
 ################################################################################
@@ -145,9 +147,9 @@ def main() -> Ret:
         # If the verbose flag is set, change the default logging level.
         if args.verbose:
             logging.basicConfig(level=logging.INFO)
-            logging.info("Program arguments: ")
+            LOG.info("Program arguments: ")
             for arg in vars(args):
-                logging.info("* %s = %s", arg, vars(args)[arg])
+                LOG.info("* %s = %s", arg, vars(args)[arg])
 
         # Create a Polarion client which communicates to the Polarion server.
         # A broad exception has to be caught since the specific Exception Type can't be accessed.
@@ -158,7 +160,7 @@ def main() -> Ret:
                               verify_certificate=False,
                               static_service_list=True)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logging.error(e)
+            LOG.error(e)
             ret_status = Ret.ERROR_LOGIN
 
         if Ret.OK == ret_status:
@@ -174,7 +176,7 @@ def main() -> Ret:
             if handler is not None:
                 ret_status = handler(args, client)
             else:
-                logging.error("Command '%s' not found!", args.cmd)
+                LOG.error("Command '%s' not found!", args.cmd)
                 ret_status = Ret.ERROR_INVALID_ARGUMENTS
 
     return ret_status

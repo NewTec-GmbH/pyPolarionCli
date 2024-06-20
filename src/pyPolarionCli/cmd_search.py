@@ -46,6 +46,7 @@ from .ret import Ret
 # Variables
 ################################################################################
 
+LOG: logging.Logger = logging.getLogger(__name__)
 _CMD_NAME = "search"
 _OUTPUT_FILE_NAME = "search_results.json"
 
@@ -202,7 +203,7 @@ def _execute(args, polarion_client: Polarion) -> Ret:
                 output_dict['project'])
         # Exception of type Exception is raised when the project does not exist.
         except Exception as ex:  # pylint: disable=broad-except
-            logging.error("%s", ex)
+            LOG.error("%s", ex)
             ret_status = Ret.ERROR_SEARCH_FAILED
         else:
             # Search for work items in the project.
@@ -230,7 +231,7 @@ def _execute(args, polarion_client: Polarion) -> Ret:
             with open(file_path, 'w', encoding="UTF-8") as file:
                 file.write(json.dumps(output_dict, indent=2))
 
-            logging.info("Search results stored in %s", file_path)
+            LOG.info("Search results stored in %s", file_path)
             ret_status = Ret.OK
 
     return ret_status
