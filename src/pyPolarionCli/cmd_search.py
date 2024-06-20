@@ -145,20 +145,22 @@ def register(subparser) -> dict:
     sub_parser_search: argparse.ArgumentParser = \
         subparser.add_parser(_CMD_NAME,
                              help="Search for Polarion work items.")
+    required_subarguments = sub_parser_search.add_argument_group(
+        'required arguments')
 
-    sub_parser_search.add_argument('-p',
-                                   '--project',
-                                   type=str,
-                                   metavar='<project_id>',
-                                   required=True,
-                                   help="The ID of the Polarion project to search in.")
+    required_subarguments.add_argument('-p',
+                                       '--project',
+                                       type=str,
+                                       metavar='<project_id>',
+                                       required=True,
+                                       help="The ID of the Polarion project to search in.")
 
-    sub_parser_search.add_argument('-q',
-                                   '--query',
-                                   type=str,
-                                   metavar='<query>',
-                                   required=True,
-                                   help="The query string to search for work items.")
+    required_subarguments.add_argument('-q',
+                                       '--query',
+                                       type=str,
+                                       metavar='<query>',
+                                       required=True,
+                                       help="The query string to search for work items.")
 
     sub_parser_search.add_argument('-o',
                                    '--output',

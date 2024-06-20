@@ -84,26 +84,28 @@ def add_parser() -> argparse.ArgumentParser:
                                      description=PROG_DESC,
                                      epilog=PROG_EPILOG)
 
-    parser.add_argument('-u',
-                        '--user',
-                        type=str,
-                        metavar='<user>',
-                        required=True,
-                        help="The user to authenticate with the Polarion server")
+    required_arguments = parser.add_argument_group('required arguments')
 
-    parser.add_argument('-p',
-                        '--password',
-                        type=str,
-                        metavar='<password>',
-                        required=True,
-                        help="The password to authenticate with the Polarion server")
+    required_arguments.add_argument('-u',
+                                    '--user',
+                                    type=str,
+                                    metavar='<user>',
+                                    required=True,
+                                    help="The user to authenticate with the Polarion server.")
 
-    parser.add_argument('-s',
-                        '--server',
-                        type=str,
-                        metavar='<server_url>',
-                        required=True,
-                        help="The Polarion server URL to connect to.")
+    required_arguments.add_argument('-p',
+                                    '--password',
+                                    type=str,
+                                    metavar='<password>',
+                                    required=True,
+                                    help="The password to authenticate with the Polarion server.")
+
+    required_arguments.add_argument('-s',
+                                    '--server',
+                                    type=str,
+                                    metavar='<server_url>',
+                                    required=True,
+                                    help="The Polarion server URL to connect to.")
 
     parser.add_argument("--version",
                         action="version",
