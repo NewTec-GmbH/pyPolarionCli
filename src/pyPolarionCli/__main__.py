@@ -38,9 +38,9 @@ import argparse
 import logging
 from polarion.polarion import Polarion
 
-from .version import __version__, __author__, __email__, __repository__, __license__
-from .ret import Ret
-from .cmd_search import register as cmd_search_register
+from pyPolarionCli.version import __version__, __author__, __email__, __repository__, __license__
+from pyPolarionCli.ret import Ret
+from pyPolarionCli.cmd_search import register as cmd_search_register
 
 
 ################################################################################
