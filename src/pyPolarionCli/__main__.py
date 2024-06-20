@@ -40,14 +40,16 @@ from polarion.polarion import Polarion
 
 from .version import __version__, __author__, __email__, __repository__, __license__
 from .ret import Ret
+from .cmd_search import register as cmd_search_register
 
 
 ################################################################################
 # Variables
 ################################################################################
 
-# Add command modules here
-_CMD_MODULES = [
+# Register a command here!
+_COMMAND_REG_LIST = [
+    cmd_search_register
 ]
 
 PROG_NAME = "pyPolarionCli"
@@ -84,18 +86,21 @@ def add_parser() -> argparse.ArgumentParser:
                         '--user',
                         type=str,
                         metavar='<user>',
+                        required=True,
                         help="The user to authenticate with the Polarion server")
 
     parser.add_argument('-p',
                         '--password',
                         type=str,
                         metavar='<password>',
+                        required=True,
                         help="The password to authenticate with the Polarion server")
 
     parser.add_argument('-s',
                         '--server',
                         type=str,
                         metavar='<server_url>',
+                        required=True,
                         help="The Polarion server URL to connect to.")
 
     parser.add_argument("--version",
@@ -108,40 +113,45 @@ def add_parser() -> argparse.ArgumentParser:
                         help="Print full command details before executing the command.\
                             Enables logs of type INFO and WARNING.")
 
-    # to do: Register subparsers once the command files are generated.
-
     return parser
 
 
-def main() -> int:
+def main() -> Ret:
     """ The program entry point function.
 
     Returns:
         int: System exit status.
     """
     ret_status = Ret.OK
+    commands = []
+
+    # Create the main parser and add the subparsers.
+    parser = add_parser()
+    subparser = parser.add_subparsers(required=True, dest="cmd")
+
+    # Register all commands.
+    for cmd_register in _COMMAND_REG_LIST:
+        cmd_par_dict = cmd_register(subparser)
+        commands.append(cmd_par_dict)
 
     # Parse the command line arguments.
-    parser = add_parser()
     args = parser.parse_args()
 
+    # Check if the command line arguments are valid.
     if args is None:
         ret_status = Ret.ERROR_ARGPARSE
+        parser.print_help()
     else:
         # If the verbose flag is set, change the default logging level.
         if args.verbose:
             logging.basicConfig(level=logging.INFO)
-
-        logging.info("Program arguments: ")
-
-        for arg in vars(args):
-            logging.info("* %s = %s", arg, vars(args)[arg])
+            logging.info("Program arguments: ")
+            for arg in vars(args):
+                logging.info("* %s = %s", arg, vars(args)[arg])
 
         # Create a Polarion client which communicates to the Polarion server.
         # A broad exception has to be caught since the specific Exception Type can't be accessed.
         try:
-            # to do: remove the "pylint: disable" once the client is used.
-            # pylint: disable=unused-variable
             client = Polarion(polarion_url=args.server,
                               user=args.user,
                               password=args.password,
@@ -152,9 +162,20 @@ def main() -> int:
             ret_status = Ret.ERROR_LOGIN
 
         if Ret.OK == ret_status:
-            pass
-            # to do: Call the respective Function and pass the
-            # Polarion Client once the Commands are implemented
+            handler = None
+
+            # Find the command handler.
+            for command in commands:
+                if command["name"] == args.cmd:
+                    handler = command["handler"]
+                    break
+
+            # Execute the command.
+            if handler is not None:
+                ret_status = handler(args, client)
+            else:
+                logging.error("Command '%s' not found!", args.cmd)
+                ret_status = Ret.ERROR_INVALID_ARGUMENTS
 
     return ret_status
 
