@@ -1,0 +1,40 @@
+@startuml pyPolarionCli_components
+top to bottom direction
+skinparam Linetype ortho
+
+package "pyPolarionCli" as cli{
+    component "main" as main
+    component "cmd_search" as search
+}
+ 
+database "Polarion Server" as polarion{
+    file "Project" as project {
+        file "Work Item" as work_item
+    }
+}
+
+database "File System" as filesystem {
+    file "JSON file" as file
+}
+
+main ..> search : <<flow>>\n<<store>>  
+search ..> file : <<store>>
+search ..> work_item : <<query>>
+
+' notes '
+note left of main
+Required arguments:
+    -s server_url
+    -u username
+    -p password
+end note
+
+note left of search
+Required arguments:
+    -j project_id
+    -q query
+Optional arguments:
+    -o output_folder
+end note
+
+@enduml
