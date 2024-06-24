@@ -128,7 +128,7 @@ def _parse_attributes_recursively(output_dict: dict, value: object, key: str) ->
     output_dict[key] = attribute_value
 
 
-def _search_full_items(project: Project, query: str) -> list[Workitem]:
+def _parse_nested_search_results(search_result: list[Workitem]) -> list[dict]:
     """Search for work items in a project and return the full work item objects.
 
     Args:
@@ -138,10 +138,7 @@ def _search_full_items(project: Project, query: str) -> list[Workitem]:
     Returns:
         list[Workitem]: The list of work items.
     """
-    output_list: list[Workitem] = []
-
-    # Search for work items in the project.
-    search_result: list[Workitem] = project.searchWorkitemFullItem(query)
+    output_list: list[dict] = []
 
     # Iterate over the search results and store them in the output dictionary.
     for workitem in search_result:
@@ -150,7 +147,12 @@ def _search_full_items(project: Project, query: str) -> list[Workitem]:
         # Parse the attributes of the work item recursively.
         # Internal _polarion_item attribute is used to access the work item attributes.
         # pylint: disable=protected-access
-        for _, value in workitem._polarion_item.__dict__.items():
+        if hasattr(workitem, "_polarion_item"):
+            all_items = workitem._polarion_item.__dict__.items()
+        else:
+            all_items = workitem.__dict__.items()
+
+        for _, value in all_items:
             for key in value:
                 _parse_attributes_recursively(
                     workitem_dict, value[key], key)
@@ -208,6 +210,14 @@ def register(subparser) -> dict:
                                    help="Get the full information of the work items. " +
                                    "Can be slow in case of many work items.")
 
+    sub_parser_search.add_argument("--field",
+                                   type=str,
+                                   action="append",
+                                   metavar="<field>",
+                                   required=False,
+                                   help="The field to search for in the work items. " +
+                                   "Can be used multiple times to search for multiple fields.")
+
     return cmd_dict
 
 
@@ -248,10 +258,21 @@ def _execute(args, polarion_client: Polarion) -> Ret:
             ret_status = Ret.ERROR_SEARCH_FAILED
         else:
             if args.full is True:
-                output_dict["results"] = _search_full_items(
-                    project, output_dict["query"])
+                # Search for work items in the project.
+                search_result: list[Workitem] = project.searchWorkitemFullItem(
+                    output_dict["query"])
+
+                output_dict["results"] = \
+                    _parse_nested_search_results(search_result)
+            elif args.field is not None:
+                search_result: list[Workitem] = project.searchWorkitem(
+                    args.query, field_list=args.field)
+
+                output_dict["results"] = \
+                    _parse_nested_search_results(search_result)
             else:
-                search_result = project.searchWorkitem(args.query)
+                search_result: list[Workitem] = project.searchWorkitem(
+                    args.query)
                 for item in search_result:
                     item_dict = vars(item).get("__values__")
                     output_dict["results"].append(item_dict)
