@@ -128,6 +128,39 @@ def _parse_attributes_recursively(output_dict: dict, value: object, key: str) ->
     output_dict[key] = attribute_value
 
 
+def _search_full_items(project: Project, query: str) -> list[Workitem]:
+    """Search for work items in a project and return the full work item objects.
+
+    Args:
+        project (obj): The project object to search in.
+        query (str): The query string to search for work items.
+
+    Returns:
+        list[Workitem]: The list of work items.
+    """
+    output_list: list[Workitem] = []
+
+    # Search for work items in the project.
+    search_result: list[Workitem] = project.searchWorkitemFullItem(query)
+
+    # Iterate over the search results and store them in the output dictionary.
+    for workitem in search_result:
+        workitem_dict: dict = {}
+
+        # Parse the attributes of the work item recursively.
+        # Internal _polarion_item attribute is used to access the work item attributes.
+        # pylint: disable=protected-access
+        for _, value in workitem._polarion_item.__dict__.items():
+            for key in value:
+                _parse_attributes_recursively(
+                    workitem_dict, value[key], key)
+
+        # Append the work item dictionary to the results list.
+        output_list.append(workitem_dict)
+
+    return output_list
+
+
 def register(subparser) -> dict:
     """ Register subparser commands for the login module.
 
@@ -169,6 +202,12 @@ def register(subparser) -> dict:
                                    required=False,
                                    help="The path to output folder to store the search results.")
 
+    sub_parser_search.add_argument('--full',
+                                   action='store_true',
+                                   required=False,
+                                   help="Get the full information of the work items. " +
+                                   "Can be slow in case of many work items.")
+
     return cmd_dict
 
 
@@ -208,26 +247,16 @@ def _execute(args, polarion_client: Polarion) -> Ret:
             LOG.error("%s", ex)
             ret_status = Ret.ERROR_SEARCH_FAILED
         else:
-            # Search for work items in the project.
-            search_result: list[Workitem] = project.searchWorkitemFullItem(
-                output_dict['query'])
+            if args.full is True:
+                output_dict["results"] = _search_full_items(
+                    project, output_dict["query"])
+            else:
+                search_result = project.searchWorkitem(args.query)
+                for item in search_result:
+                    item_dict = vars(item).get("__values__")
+                    output_dict["results"].append(item_dict)
 
-            output_dict["number_of_results"] = len(search_result)
-
-            # Iterate over the search results and store them in the output dictionary.
-            for workitem in search_result:
-                workitem_dict: dict = {}
-
-                # Parse the attributes of the work item recursively.
-                # Internal _polarion_item attribute is used to access the work item attributes.
-                # pylint: disable=protected-access
-                for _, value in workitem._polarion_item.__dict__.items():
-                    for key in value:
-                        _parse_attributes_recursively(
-                            workitem_dict, value[key], key)
-
-                # Append the work item dictionary to the results list.
-                output_dict["results"].append(workitem_dict)
+            output_dict["number_of_results"] = len(output_dict["results"])
 
             # Store the search results in a JSON file.
             with open(file_path, 'w', encoding="UTF-8") as file:
