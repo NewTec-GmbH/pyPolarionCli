@@ -173,7 +173,7 @@ def register(subparser) -> dict:
 
 
 def _execute(args, polarion_client: Polarion) -> Ret:
-    """ This function servers as entry point for the command 'search'.
+    """ This function serves as entry point for the command 'search'.
         It will be stored as callback for this module's subparser command.
 
     Args: 
