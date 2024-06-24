@@ -252,11 +252,7 @@ def _execute(args, polarion_client: Polarion) -> Ret:
             # Get the project object from the Polarion client.
             project: Project = polarion_client.getProject(
                 output_dict['project'])
-        # Exception of type Exception is raised when the project does not exist.
-        except Exception as ex:  # pylint: disable=broad-except
-            LOG.error("%s", ex)
-            ret_status = Ret.ERROR_SEARCH_FAILED
-        else:
+
             if args.full is True:
                 # Search for work items in the project.
                 search_result: list[Workitem] = project.searchWorkitemFullItem(
@@ -285,6 +281,11 @@ def _execute(args, polarion_client: Polarion) -> Ret:
 
             LOG.info("Search results stored in %s", file_path)
             ret_status = Ret.OK
+
+        # Exception of type Exception is raised when the project does not exist.
+        except Exception as ex:  # pylint: disable=broad-except
+            LOG.error("%s", ex)
+            ret_status = Ret.ERROR_SEARCH_FAILED
 
     return ret_status
 
