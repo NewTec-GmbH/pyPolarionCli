@@ -36,6 +36,7 @@
 import json
 import argparse
 import logging
+import os
 from datetime import date, datetime
 from polarion.polarion import Polarion
 from polarion.project import Project
@@ -246,7 +247,10 @@ def _execute(args, polarion_client: Polarion) -> Ret:
         if args.output is not None:
             output_folder = args.output
 
-        file_path: str = f"{output_folder}/{output_dict['project']}_{_OUTPUT_FILE_NAME}"
+            if not os.path.isdir(output_folder):
+                os.mkdir(output_folder)
+        file_path: str = os.path.join(
+            output_folder, f"{output_dict['project']}_{_OUTPUT_FILE_NAME}")
 
         try:
             # Get the project object from the Polarion client.
