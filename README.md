@@ -2,18 +2,26 @@
 
 pyPolarionCli is a command-line tool designed for easy access to Polarion work items, e.g. for metric creation.
 
-[![License](https://img.shields.io/badge/license-bsd-3.svg)](https://choosealicense.com/licenses/bsd-3-clause/) [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![CI](https://github.com/NewTec-GmbH/pyPolarionCli/actions/workflows/ci.yml/badge.svg)](https://github.com/NewTec-GmbH/pyPolarionCli/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-bsd-3.svg)](https://choosealicense.com/licenses/bsd-3-clause/) [![Repo Status](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![CI](https://github.com/NewTec-GmbH/pyPolarionCli/actions/workflows/ci.yml/badge.svg)](https://github.com/NewTec-GmbH/pyPolarionCli/actions/workflows/ci.yml)
 
-* [Installation](#installation)
-* [Overview](#overview)
-* [Usage](#usage)
-* [Commands](#commands)
-  * [Search](#search)
-* [Examples](#examples)
-* [Used Libraries](#used-libraries)
-* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-* [License](#license)
-* [Contribution](#contribution)
+- [Overview](#overview)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Flags](#flags)
+  - [Login options](#login-options)
+- [Commands](#commands)
+- [Examples](#examples)
+- [Compile into an executable](#compile-into-an-executable)
+- [Used Libraries](#used-libraries)
+- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+- [License](#license)
+- [Contribution](#contribution)
+
+## Overview
+
+![overview](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/NewTec-GmbH/pyPolarionCli/main/design/UML/context.puml)
+
+More information on the deployment and architecture can be found in the [doc](./doc/README.md) folder.
 
 ## Installation
 
@@ -23,44 +31,51 @@ cd pyPolarionCli
 pip install .
 ```
 
-## Overview
-
-![overview](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/NewTec-GmbH/pyPolarionCli/main/design/UML/context.puml)
-
 ## Usage
 
-Show help information:
-
 ```cmd
-pyPolarionCli --help
+pyPolarionCli [-h] -u <user> -p <password> -s <server_url> [--version] [-v] {command} {command_options}
 ```
+
+### Flags
+
+| Flag           | Description                                                                                     |
+| :-----------:  | ----------------------------------------------------------------------------------------------- |
+| --verbose , -v | Print full command details before executing the command. Enables logs of type INFO and WARNING. |
+| --version      | Import a ticket from a JSON file.                                                               |
+| --help , -h    | Show the help message and exit.                                                                 |
+
+### Login options
+
+To connect to the Polarion server, provide all credentials via Command Line arguments:
+    - `--server <server URL>` is required.
+    - ID using `--user <user>` and `--password <password>`
 
 ## Commands
 
-### Search
-
-Search for Work items on the Polarion Server.
-The query must be in the Polarion format.
-
-Example:
-
-```cmd
-pyPolarionCli --user my_username --password my_password --server my_server search --project my_project --query "author.id:myname"
-
-```
-
-Try the search command by executing the [batch file](./examples/search/search.bat).
+| Command                                     | Description                                         |
+| :-----------------------------------------: | --------------------------------------------------- |
+|[search](./doc/commands/search.md)           | Search for Polarion work items.                     |
 
 ## Examples
 
 Check out the all the [Examples](./examples) on how to use the pyPolarionCli tool.
 
+## Compile into an executable
+
+It is possible to create an executable file that contains the tool and all its dependencies. "PyInstaller" is used for this.
+Just run the following command on the root of the folder:
+
+```cmd
+pyinstaller --noconfirm --onefile --console --name "pyPolarionCli" --add-data "./pyproject.toml;."  "./src/pyPolarionCli/__main__.py"
+```
+
 ## Used Libraries
 
 Used 3rd party libraries which are not part of the standard Python package:
 
-* [polarion](https://pypi.org/project/polarion/) - Python library for interacting with Polarion - MIT License
-* [toml](https://github.com/uiri/toml) - Parsing [TOML](https://en.wikipedia.org/wiki/TOML) - MIT License
+- [polarion](https://pypi.org/project/polarion/) - Python library for interacting with Polarion - MIT License
+- [toml](https://github.com/uiri/toml) - Parsing [TOML](https://en.wikipedia.org/wiki/TOML) - MIT License
 
 ## Issues, Ideas And Bugs
 

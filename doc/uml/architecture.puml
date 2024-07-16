@@ -1,0 +1,20 @@
+@startuml ArchitectureDiagram
+
+package "pyPolarionCli" as pyPolarionCli {
+    component "Main Entry Point" as main
+    component "Commands" <<command>> as cmd
+}
+
+package "Polarion" {
+    component "Polarion" as polarion
+}
+
+package "Python" as python {
+    component "Argparse" as argparse
+}
+
+main *--> polarion
+main o--> cmd : 0..*
+main *--> argparse
+
+@enduml
