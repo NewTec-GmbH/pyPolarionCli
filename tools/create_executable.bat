@@ -1,2 +1,0 @@
-rem Please run this script from the root path. ".\tools\create_executable.bat"
-pyinstaller --noconfirm --onefile --console --name "pyPolarionCli" --add-data "./pyproject.toml;."  "./src/pyPolarionCli/__main__.py"
