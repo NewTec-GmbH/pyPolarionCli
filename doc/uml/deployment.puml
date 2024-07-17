@@ -1,0 +1,25 @@
+@startuml DeploymentDiagram
+
+node "Polarion"<<virtual-machine>> as polarion
+database "SVN Repository" as svnRepo
+
+interface "SOAP API" as polarionSoapApi
+
+polarion --- polarionSoapApi
+polarion -- svnRepo
+
+node "Continuous Integration Server"<<virtual-machine>> {
+
+    package "scripts" {
+        component "pyPolarionCli" as pyPolarionCli
+    }
+}
+
+polarionSoapApi )-- pyPolarionCli
+
+note top of polarion
+    Requirements management.
+end note
+
+
+@enduml
