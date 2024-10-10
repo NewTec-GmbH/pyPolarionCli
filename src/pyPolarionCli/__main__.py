@@ -97,8 +97,16 @@ def add_parser() -> argparse.ArgumentParser:
                                     '--password',
                                     type=str,
                                     metavar='<password>',
-                                    required=True,
-                                    help="The password to authenticate with the Polarion server.")
+                                    required=False,
+                                    help="The password to authenticate with the Polarion server.\
+                                    Is ignored if a token is defined using -t option.")
+
+    required_arguments.add_argument('-t',
+                                    '--token',
+                                    type=str,
+                                    metavar='<token>',
+                                    required=False,
+                                    help="The token to authenticate with the Polarion server.")
 
     required_arguments.add_argument('-s',
                                     '--server',
@@ -145,6 +153,9 @@ def main() -> Ret:
     if args is None:
         ret_status = Ret.ERROR_ARGPARSE
         parser.print_help()
+    elif (args.password is None) and (args.token is None):
+        ret_status = Ret.ERROR_INVALID_ARGUMENTS
+        LOG.error("Missing password or token!")
     else:
         # If the verbose flag is set, change the default logging level.
         if args.verbose:
@@ -159,6 +170,7 @@ def main() -> Ret:
             client = Polarion(polarion_url=args.server,
                               user=args.user,
                               password=args.password,
+                              token=args.token,
                               verify_certificate=False,
                               static_service_list=True)
         except Exception as e:  # pylint: disable=broad-exception-caught
