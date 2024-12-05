@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyPolarionCli"
-version = "1.2.0"
+version = "1.2.1"
 description = "pyPolarionCli is a command-line tool designed for easy access to Polarion work items, e.g. for metric creation."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -44,3 +44,6 @@ pyPolarionCli = "pyPolarionCli.__main__:main"
 pythonpath = [
   "src"
 ]
+
+[tool.setuptools.package-data]
+pyPolarionCli = ["pyproject.toml"]
