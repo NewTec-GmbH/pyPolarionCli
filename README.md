@@ -19,7 +19,7 @@ pyPolarionCli is a command-line tool designed for easy access to Polarion work i
 
 ## Overview
 
-![overview](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/NewTec-GmbH/pyPolarionCli/main/design/UML/context.puml)
+![overview](https://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/NewTec-GmbH/pyPolarionCli/main/doc/uml/context.puml)
 
 More information on the deployment and architecture can be found in the [doc](./doc/README.md) folder.
 
@@ -40,9 +40,9 @@ pyPolarionCli [-h] -u <user> -p <password> -s <server_url> [--version] [-v] {com
 ### Flags
 
 | Flag           | Description                                                                                     |
-| :-----------:  | ----------------------------------------------------------------------------------------------- |
+| :------------: | ----------------------------------------------------------------------------------------------- |
 | --verbose , -v | Print full command details before executing the command. Enables logs of type INFO and WARNING. |
-| --version      | Import a ticket from a JSON file.                                                               |
+| --version      | Show  version information.                                                                      |
 | --help , -h    | Show the help message and exit.                                                                 |
 
 ### Login options
